@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Winners Chapel Tithe System</title>
+  <style>
+    /* Reset & base */
+    * {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background: #f0f2f5;
+      color: #222;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #1a237e; /* deep blue */
+      padding: 20px 40px;
+      color: #fff;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.8rem;
+      letter-spacing: 1.2px;
+      box-shadow: 0 4px 8px rgb(26 35 126 / 0.3);
+      flex-shrink: 0;
+    }
+    nav {
+      background: #283593; /* medium blue */
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      padding: 15px 0;
+      box-shadow: inset 0 -3px 6px rgb(0 0 0 / 0.15);
+      flex-shrink: 0;
+    }
+    nav button {
+      background: transparent;
+      border: none;
+      color: #c5cae9;
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 30px;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      letter-spacing: 0.03em;
+    }
+    nav button:hover,
+    nav button.active {
+      background: #3949ab;
+      color: #fff;
+      box-shadow: 0 3px 10px rgb(57 73 171 / 0.5);
+    }
+    main {
+      flex: 1;
+      padding: 30px 40px;
+      max-width: 960px;
+      margin: 0 auto 80px; /* leave space for footer */
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgb(0 0 0 / 0.07);
+    }
+    section {
+      display: none;
+      animation: fadeIn 0.4s ease forwards;
+    }
+    section.active {
+      display: block;
+    }
+    h2 {
+      margin-bottom: 25px;
+      color: #1a237e;
+      font-weight: 700;
+      font-size: 1.6rem;
+      border-bottom: 2px solid #3949ab;
+      padding-bottom: 8px;
+      letter-spacing: 0.04em;
+    }
+    input, select {
+      width: 100%;
+      max-width: 400px;
+      padding: 12px 15px;
+      margin: 12px 0 24px;
+      border: 1.8px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+      outline-offset: 2px;
+    }
+    input:focus, select:focus {
+      border-color: #3949ab;
+      outline: none;
+      box-shadow: 0 0 8px #3949abaa;
+    }
+    button.submit {
+      background: #3949ab;
+      color: white;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 14px 32px;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 6px 14px rgb(57 73 171 / 0.45);
+      transition: background-color 0.3s ease;
+      letter-spacing: 0.05em;
+    }
+    button.submit:hover {
+      background: #1a237e;
+      box-shadow: 0 8px 20px rgb(26 35 126 / 0.7);
+    }
+    #addMemberResult, #depositResult {
+      margin-top: -16px;
+      font-weight: 600;
+      font-size: 1rem;
+      color: #2e7d32; /* success green */
+      min-height: 24px;
+    }
+    /* Statement styles */
+    #statementResult {
+      margin-top: 20px;
+      font-size: 1rem;
+      color: #222;
+    }
+    #printBtn {
+      background: #1a237e;
+      color: #fff;
+      font-weight: 600;
+      border-radius: 30px;
+      padding: 10px 24px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 6px 14px rgb(26 35 126 / 0.5);
+      margin-top: 12px;
+      transition: background-color 0.3s ease;
+    }
+    #printBtn:hover {
+      background: #283593;
+      box-shadow: 0 8px 20px rgb(40 53 147 / 0.7);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 18px;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+    }
+    thead {
+      background: #3949ab;
+      color: white;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    th, td {
+      padding: 14px 20px;
+      text-align: left;
+      border-bottom: 1px solid #e3e7fd;
+    }
+    tbody tr:hover {
+      background: #e8eaf6;
+      cursor: default;
+    }
+    tbody tr:last-child {
+      font-weight: 700;
+      background: #c5cae9;
+    }
+    /* Dashboard styling */
+    #dashboardContent div {
+      background: #f7f8fc;
+      border-radius: 10px;
+      padding: 15px 20px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 5px rgb(0 0 0 / 0.05);
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1a237e;
+      border-left: 6px solid #3949ab;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(15px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+    /* Responsive */
+    @media (max-width: 520px) {
+      nav {
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      main {
+        padding: 20px 20px 30px;
+        width: 90%;
+      }
+      input, select {
+        max-width: 100%;
+      }
+    }
+
+    /* FOOTER */
+    footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #1a237e;
+      color: #fff;
+      text-align: center;
+      padding: 14px 0;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      box-shadow: 0 -4px 8px rgb(26 35 126 / 0.4);
+      flex-shrink: 0;
+      font-size: 0.9rem;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <header>Winners Chapel Tithe System</header>
+
+  <nav>
+    <button class="active" id="btnAddMember" onclick="switchTab('addMember', this)">Add Member</button>
+    <button id="btnDeposit" onclick="switchTab('deposit', this)">Deposit</button>
+    <button id="btnDashboard" onclick="switchTab('dashboard', this)">Dashboard</button>
+    <button id="btnStatement" onclick="switchTab('statement', this)">Print Statement</button>
+  </nav>
+
+  <main>
+    <section id="addMember" class="active" aria-label="Add new member form">
+      <h2>Add New Member</h2>
+      <input type="text" id="memberId" placeholder="Member Tithe ID" autocomplete="off" />
+      <input type="text" id="fullName" placeholder="Full Name" autocomplete="off" />
+      <input type="text" id="contact" placeholder="Contact" autocomplete="off" />
+      <button class="submit" onclick="addMember()">Submit</button>
+      <p id="addMemberResult" role="alert" aria-live="polite"></p>
+    </section>
+
+    <section id="deposit" aria-label="Deposit tithe">
+      <h2>Deposit Tithe</h2>
+      <input type="date" id="datePaid" />
+      <input type="text" id="depositorName" placeholder="Member Name" autocomplete="off" />
+      <input type="text" id="depositorId" placeholder="Member Tithe ID" autocomplete="off" />
+      <input type="number" id="amount" placeholder="Amount" min="0" step="0.01" />
+      <select id="currency" aria-label="Select Currency">
+        <option value="USD">USD</option>
+        <option value="LRD">LRD</option>
+      </select>
+      <select id="paymentType" aria-label="Select Payment Type">
+        <option value="TITHE">TITHE</option>
+        <option value="PROJECT">PROJECT</option>
+        <option value="SHILOH SACRIFICE">SHILOH SACRIFICE</option>
+      </select>
+      <input type="text" id="tellerName" placeholder="Teller Name" autocomplete="off" />
+      <button class="submit" onclick="depositTithe()">Submit</button>
+      <p id="depositResult" role="alert" aria-live="polite"></p>
+    </section>
+
+    <section id="dashboard" aria-label="Recent deposits dashboard">
+      <h2>Recent Deposits</h2>
+      <div id="dashboardContent">Loading...</div>
+    </section>
+
+    <section id="statement" aria-label="Generate and print statement">
+      <h2>Generate Statement</h2>
+      <input type="text" id="searchKey" placeholder="Enter Name or Tithe ID" autocomplete="off" />
+      <button class="submit" onclick="searchStatement()">Search</button>
+      <div id="statementResult"></div>
+      <button id="printBtn" style="display:none;" onclick="printStatement()">🖨️ Print</button>
+    </section>
+  </main>
+
+  <footer>© 2025 Winners Chapel Tithe System -- Developed by  HezTech Whataspp  0776054191  Email  www.hklotyg@gmail.com</footer>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwsmePRv_RxpjrmqwEhCRYyBzEQyKyM3NU94AU3AH-xW79Z0kncL3mgWlPRulN8NHXYMQ/exec";
+
+    function switchTab(id, btn) {
+      document.querySelectorAll("section").forEach(s => s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+
+      document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      if (id === "dashboard") loadDashboard();
+    }
+
+    async function addMember() {
+      const memberId = document.getElementById("memberId").value.trim();
+      const fullName = document.getElementById("fullName").value.trim();
+      const contact = document.getElementById("contact").value.trim();
+      const resultEl = document.getElementById("addMemberResult");
+
+      if (!memberId || !fullName) {
+        resultEl.style.color = "red";
+        resultEl.textContent = "Member ID and Full Name are required.";
+        return;
+      }
+
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "addMember",
+            memberId,
+            fullName,
+            contact,
+          }),
+        });
+
+        const result = await res.json();
+        if (result.status === "success") {
+          resultEl.style.color = "#2e7d32"; // success green
+          resultEl.textContent = "✅ Member added successfully!";
+          clearAddMemberForm();
+        } else {
+          resultEl.style.color = "red";
+          resultEl.textContent = "❌ This Tithe ID already exists.";
+        }
+      } catch {
+        resultEl.style.color = "red";
+        resultEl.textContent = "❌ Submission failed. Try again.";
+      }
+
+      // Clear message after 5 seconds
+      setTimeout(() => {
+        resultEl.textContent = "";
+      }, 5000);
+    }
+
+    function clearAddMemberForm() {
+      document.getElementById("memberId").value = "";
+      document.getElementById("fullName").value = "";
+      document.getElementById("contact").value = "";
+    }
+
+    async function depositTithe() {
+      const datePaid = document.getElementById("datePaid").value;
+      const fullName = document.getElementById("depositorName").value.trim();
+      const memberId = document.getElementById("depositorId").value.trim();
+      const amount = document.getElementById("amount").value.trim();
+      const currency = document.getElementById("currency").value;
+      const paymentType = document.getElementById("paymentType").value;
+      const tellerName = document.getElementById("tellerName").value.trim();
+      const resultEl = document.getElementById("depositResult");
+
+      if (!datePaid || !fullName || !memberId || !amount || !tellerName) {
+        resultEl.style.color = "red";
+        resultEl.textContent = "Please fill all required fields.";
+        return;
+      }
+
+      try {
+        const res = await fetch(SCRIPT_URL, {
+          method: "POST",
+          body: JSON.stringify({
+            action: "depositTithe",
+            datePaid,
+            fullName,
+            memberId,
+            amount,
+            currency,
+            paymentType,
+            tellerName,
+          }),
+        });
+
+        const result = await res.json();
+        if (result.status === "success") {
+          resultEl.style.color = "#2e7d32";
+          resultEl.textContent = "✅ Deposit recorded!";
+          clearDepositForm();
+        } else {
+          resultEl.style.color = "red";
+          resultEl.textContent = "❌ Failed to submit deposit.";
+        }
+      } catch {
+        resultEl.style.color = "red";
+        resultEl.textContent = "❌ Submission failed. Try again.";
+      }
+
+      setTimeout(() => {
+        resultEl.textContent = "";
+      }, 5000);
+    }
+
+    function clearDepositForm() {
+      document.getElementById("datePaid").value = "";
+      document.getElementById("depositorName").value = "";
+      document.getElementById("depositorId").value = "";
+      document.getElementById("amount").value = "";
+      document.getElementById("currency").value = "USD";
+      document.getElementById("paymentType").value = "TITHE";
+      document.getElementById("tellerName").value = "";
+    }
+
+    async function loadDashboard() {
+      const dashboardDiv = document.getElementById("dashboardContent");
+      dashboardDiv.textContent = "Loading...";
+      try {
+        const res = await fetch(SCRIPT_URL);
+        const data = await res.json();
+        if (!Array.isArray(data) || data.length === 0) {
+          dashboardDiv.textContent = "No deposits yet.";
+          return;
+        }
+        const recent = data.slice(-10).reverse();
+        const html = recent
+          .map(
+            (row) => `
+            <div>
+              <strong>${row.memberName}</strong> (${row.memberId}) deposited
+              <span style="color:#3949ab;">${row.amount} ${row.currency}</span> for
+              <em>${row.paymentType}</em> on <time datetime="${row.date}">${row.date}</time>.
+            </div>
+          `
+          )
+          .join("");
+        dashboardDiv.innerHTML = html;
+      } catch {
+        dashboardDiv.textContent = "Failed to load data.";
+      }
+    }
+
+    async function searchStatement() {
+      const key = document.getElementById("searchKey").value.trim().toLowerCase();
+      const resultDiv = document.getElementById("statementResult");
+      const printBtn = document.getElementById("printBtn");
+
+      if (!key) {
+        resultDiv.textContent = "Please enter a name or tithe ID.";
+        printBtn.style.display = "none";
+        return;
+      }
+
+      try {
+        const res = await fetch(SCRIPT_URL);
+        const records = await res.json();
+
+        const match = records.filter(
+          (r) =>
+            r.memberId.toLowerCase().includes(key) ||
+            r.memberName.toLowerCase().includes(key)
+        );
+
+        if (match.length === 0) {
+          resultDiv.textContent = "No record found.";
+          printBtn.style.display = "none";
+          return;
+        }
+
+        const total = match.reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
+
+        let html = `
+          <h3>Statement for: ${match[0].memberName} (${match[0].memberId})</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Currency</th>
+                <th>Type</th>
+                <th>Teller</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${match
+                .map(
+                  (row) => `
+                <tr>
+                  <td>${row.date}</td>
+                  <td>${row.amount}</td>
+                  <td>${row.currency}</td>
+                  <td>${row.paymentType}</td>
+                  <td>${row.teller}</td>
+                </tr>
+              `
+                )
+                .join("")}
+              <tr>
+                <td><strong>Total</strong></td>
+                <td colspan="4" style="font-weight:bold;">${total.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+        `;
+        resultDiv.innerHTML = html;
+        printBtn.style.display = "inline-block";
+      } catch {
+        resultDiv.textContent = "Failed to fetch statement.";
+        printBtn.style.display = "none";
+      }
+    }
+
+    function printStatement() {
+      const content = document.getElementById("statementResult").innerHTML;
+      const newWin = window.open("", "_blank");
+      newWin.document.write(`
+        <html>
+          <head>
+            <title>Print Statement</title>
+            <style>
+              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; }
+              table { width: 100%; border-collapse: collapse; }
+              th, td { border: 1px solid #333; padding: 10px; text-align: left; }
+              th { background: #3949ab; color: white; }
+              tr:last-child td { font-weight: bold; background: #c5cae9; }
+            </style>
+          </head>
+          <body>
+            ${content}
+          </body>
+        </html>
+      `);
+      newWin.document.close();
+      newWin.focus();
+      newWin.print();
+      newWin.close();
+    }
+
+    // Load dashboard on page load if it's active
+    document.addEventListener("DOMContentLoaded", () => {
+      if (document.getElementById("dashboard").classList.contains("active")) {
+        loadDashboard();
+      }
+    });
+  </script>
+</body>
+</html>
